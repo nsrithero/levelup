@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <title>LevelUp</title>
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        /* General Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            color: white;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Blurred Background */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("{{ url_for('static', filename='assets/wallpaper/desktop_wallpaper.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            filter: blur(8px);
+            /* Increased Blur */
+            z-index: -1;
+        }
+
+        .img-responsive {
+            width: 40%;
+        }
+
+        /* Mobile View */
+        @media (max-width: 768px) {
+            body::before {
+                background-image: url("{{ url_for('static', filename='assets/wallpaper/mobile_wallpaper.jpg') }}");
+            }
+
+            .img-responsive {
+                width: 50%;
+            }
+        }
+
+        /* Content Box */
+        .content-box {
+            background-color: rgba(30, 30, 30, 0.8);
+            border: 2px solid white;
+            box-shadow: 0 0 20px rgba(0, 162, 255, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Buttons */
+        .btn-start {
+            box-shadow: 0 0 10px rgb(0, 162, 255);
+            text-shadow: 0 0 10px rgb(0, 162, 255);
+            background-color: #00a6ff59;
+            border: 2px solid white;
+            margin: 10px;
+            transition: 0.3s;
+        }
+
+        .btn-start:hover {
+            background-color: rgba(0, 162, 255, 0.8);
+            box-shadow: 0 0 20px cyan;
+        }
+
+        /* Modal Styling */
+        .modal-content {
+            background-color: rgba(15, 15, 15, 0.95);
+            border: 2px solid white;
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 162, 255, 0.5);
+        }
+
+        .modal-header {
+            font-size: 24px;
+            font-weight: bold;
+            color: cyan;
+            text-shadow: 0 0 10px cyan;
+        }
+
+        /* Modal Buttons */
+        .modal-footer .btn {
+            box-shadow: 0 0 10px rgba(0, 162, 255, 0.8);
+            border: 1px solid cyan;
+        }
+
+        /* Center the Modals */
+        .modal-dialog {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0 auto;
+        }
+
+        /* Center YES & NO Buttons */
+        .modal-footer {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .inputs {
+            color: rgb(255, 255, 255);
+            background-color: rgba(0, 213, 255, 0);
+            border: 2px solid white;
+            box-shadow: 0px 0px 20px rgb(90, 213, 220);
+            border-radius: 5%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Full-Page Content Box -->
+    <div class="content-box">
+        <img src="{{ url_for('static', filename='assets/logo/logo.png') }}" class="img-responsive"><br>
+        <button type="button" class="btn btn-primary btn-start" data-toggle="modal" data-target="#levelUpModal">Start
+            Leveling Up</button><br>
+        <button type="button" class="btn btn-primary btn-start" id="oldPlayersBtn">Old Players</button><br>
+    </div>
+
+    <!-- Login Modal for Old Players -->
+    <div id="oldPlayersModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <i class="fa fa-sign-in-alt"></i> LOGIN
+                </div><br>
+                <form action="/login" method="POST">
+                    <input type="text" id="loginUsername" name="username" placeholder="Username" class="inputs"
+                        required><br><br>
+                    <input type="password" id="loginPassword" name="password" placeholder="Password" class="inputs"
+                        required><br>
+                    <a href="#" class="forgot-password">Forgot Password?</a>
+                    <br><br>
+                    <button type="submit" class="btn btn-success">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- First Notification Modal -->
+    <div id="levelUpModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <i class="fa fa-exclamation-circle"></i> NOTIFICATION
+                </div>
+                <div class="modal-body">
+                    <p>You have acquired the qualifications to be a <b><i>Player</i></b>. Will you accept?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="yesBtn">YES</button>
+                    <button type="button" class="btn btn-danger" id="noBtn">NO</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Are You Sure? Modal -->
+    <div id="areYouSureModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <i class="fa fa-exclamation-circle"></i> CONFIRMATION
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure not to level up?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="yesSureBtn">YES</button>
+                    <button type="button" class="btn btn-danger" id="noSureBtn">NO</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Waiting for You Modal -->
+    <div id="waitingModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <i class="fa fa-hourglass-half"></i> WAITING
+                </div>
+                <div class="modal-body">
+                    <p>I will be waiting for you to return, to level up together...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup/Login Modal -->
+    <div id="signupModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <i class="fa fa-user"></i> SIGNUP
+                </div><br>
+                <form action="/signup" method="POST">
+                    <input type="email" id="email" name="email" placeholder="Email Id" class="inputs" required><br><br>
+
+                    <input type="text" id="username" name="username" placeholder="Username" class="inputs" required><br>
+                    <br><br>
+
+                    <input type="password" id="password" name="password" placeholder="Password" class="inputs"
+                        required><br><br>
+
+                    <span id="usernameError" style="color: red; display: none;"></span> <!-- Error message here -->
+
+
+                    <button type="submit" id="submitBtn" class="btn btn-success">Sign Up</button>
+                </form>
+
+
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        $(document).ready(function () {
+            $("#noBtn").click(() => {
+                $("#levelUpModal").modal("hide");
+                $("#areYouSureModal").modal("show");
+            });
+
+            $("#yesSureBtn").click(() => {
+                $("#areYouSureModal").modal("hide");
+                $("#waitingModal").modal("show");
+            });
+
+            $("#yesBtn, #noSureBtn").click(() => {
+                $("#levelUpModal, #areYouSureModal").modal("hide");
+                $("#signupModal").modal("show");
+            });
+
+            $("#oldPlayersBtn").click(() => {
+                $("#oldPlayersModal").modal("show");
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            let userEmail = "";
+            let userPassword = "";
+
+            // When "Next" is clicked, open the Username Modal
+            $("#loginBtn").click(function () {
+                userEmail = $("#email").val();
+                userPassword = $("#password").val();
+
+                if (userEmail && userPassword) {
+                    $("#signupModal").modal("hide");
+                    $("#usernameModal").modal("show");
+                } else {
+                    alert("Please enter your email and password!");
+                }
+            });
+
+            // When "Submit" is clicked, send all data to Flask
+            $("#submitBtn").click(function (event) {
+                event.preventDefault(); // Prevent default form submission
+
+                let email = $("#email").val().trim();
+                let password = $("#password").val().trim();
+                let username = $("#username").val().trim();
+
+                $("#usernameError").hide(); // Hide previous error messages
+
+                if (!email || !password || !username) {
+                    $("#usernameError").text("All fields are required!").show();
+                    return;
+                }
+
+                // Send data to Flask backend using Form Data format
+                $.ajax({
+                    type: "POST",
+                    url: "/signup",
+                    data: { 
+                        email: email, 
+                        password: password, 
+                        username: username 
+                    }, 
+                    success: function (response) {
+                        alert(response.success);  // Show success message
+                        window.location.href = response.redirect; // Redirect user
+                    },
+                    error: function (xhr) {
+                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                            $("#usernameError").text(xhr.responseJSON.error).show(); // Show error below input
+                        } else {
+                            $("#usernameError").text("Signup failed. Try again!").show();
+                        }
+                    }
+                });
+            });
+
+            // When "Login" is clicked, send all data to Flask
+
+            $("#loginBtn").click(function (event) {
+                event.preventDefault();  // Prevent default form submission
+
+                let username = $("#loginUsername").val();
+                let password = $("#loginPassword").val();
+
+                $("#loginError").hide();  // Hide previous errors
+
+                if (!username || !password) {
+                    $("#loginError").text("All fields are required!").show();
+                    return;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "/login",
+                    data: { username: username, password: password },
+                    success: function (response) {
+                        window.location.href = response.redirect; // Redirect on success
+                    },
+                    error: function (xhr) {
+                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                            $("#usernameError").text(xhr.responseJSON.error).show(); // Show error below input
+                        }
+                    }
+                });
+
+            });
+
+
+        });
+
+
+    </script>
+
+    <!-- Add this inside the <body>, before the closing </body> tag -->
+    <audio id="clickSound">
+        <source src="{{ url_for('static', filename='assets/sounds/click.mp3') }}" type="audio/mpeg">
+    </audio>
+
+    <script>
+        $(document).ready(function () {
+            let clickSound = document.getElementById("clickSound");
+
+            $("button").click(function () {
+                clickSound.currentTime = 0; // Reset audio in case it's played multiple times quickly
+                clickSound.play();
+            });
+        });
+    </script>
+
+    -
+    <!-- Add this inside the <body>, before the closing </body> tag -->
+    <audio id="popupSound">
+        <source src="{{ url_for('static', filename='assets/sounds/popup.mp3') }}" type="audio/mpeg">
+    </audio>
+
+    <script>
+        $(document).ready(function () {
+            let popupSound = document.getElementById("popupSound");
+
+            $(".modal").on("show.bs.modal", function () {
+                popupSound.currentTime = 0; // Reset audio so it plays fully
+                popupSound.play();
+            });
+        });
+    </script>
+
+
+</body>
+
+</html>

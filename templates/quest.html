@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome, {{ user.username }}</title>
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        /* General Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Changed from height: 100vh to min-height */
+        }
+
+        /* Determine the shadow color based on rank */
+        {% if user.rank in ['E', 'D', 'C'] %}
+            :root { --shadow-color: rgba(0, 162, 255, 0.8); }
+        {% elif user.rank in ['B', 'A'] %}
+            :root { --shadow-color: rgba(128, 0, 128, 0.8); } /* Purple */
+        {% elif user.rank == 'S' %}
+            :root { --shadow-color: rgba(255, 0, 0, 0.8); } /* Red */
+        {% else %}
+            :root { --shadow-color: rgba(0, 162, 255, 0.8); }
+        {% endif %}
+
+        /* Full-Page Content Box */
+        .content-box {
+            flex: 1; /* Makes sure it expands properly */
+            background-color: #1E1E1E;
+            border: 2px solid white;
+            box-shadow:
+                inset 0 0 20px var(--shadow-color),
+                0 0 20px var(--shadow-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 97%;
+            padding: 20px;
+            gap: 20px;
+            overflow-y: auto; /* Allows scrolling inside */
+        }
+
+                /* Mobile View */
+        @media (max-width: 768px) {
+            .content-box {
+                width: 87%;
+            }
+        }
+
+
+        /* Full-Width Bottom Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #1E1E1E;
+            border-top: 2px solid rgba(255, 255, 255, 0);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            box-shadow:
+                inset 0 0 15px var(--shadow-color),
+                0 0 15px var(--shadow-color);
+            z-index: 1000; /* Ensure it's above other content */
+
+        }
+
+
+        /* Navigation Icons */
+        .bottom-nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 28px;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .bottom-nav a:hover {
+            color: #00A2FF;
+            transform: scale(1.2);
+        }
+
+        .user-info {
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* Adds spacing between elements */
+        }
+
+    </style>
+</head>
+
+<body>
+
+
+    
+    <div class="content-box">
+        <h2>Quest Progress</h2>
+        <p><strong>Rank:</strong> {{ user.rank }}</p>
+        <p><strong>EXP:</strong> {{ user.exp_own }} / {{ user.exp_target }}</p>
+        <p><strong>Daily Quest:</strong> Complete the required exercises to earn EXP!</p>
+        
+        <style>
+            /* Styling for the Quest Table */
+            table {
+                width: 80%;
+                border-collapse: collapse;
+                background-color: #1E1E1E; /* Same as content box */
+                color: white;
+                text-align: center;
+                box-shadow: 0px 0px 20px white; /* White outer shadow */
+                border: 2px solid white; /* White border */
+                margin-top: 15px;
+            }
+        
+            th, td {
+                border: 2px solid white; /* White border for each cell */
+                padding: 10px;
+                font-size: 18px;
+            }
+        
+            th {
+                background-color: #333; /* Darker background for headers */
+            }
+        
+            /* Mobile-friendly table */
+            @media (max-width: 768px) {
+                table {
+                    width: 95%;
+                    font-size: 16px;
+                }
+            }
+            /* Styling for the Complete Quest Button */
+            #completeQuest {
+                background-color: #1E1E1E; /* Matches content box */
+                color: white;
+                font-size: 18px;
+                padding: 12px 24px;
+                border: 2px solid white; /* White border */
+                box-shadow: 0px 0px 15px white; /* White glowing shadow */
+                cursor: pointer;
+                transition: all 0.3s ease-in-out;
+                border-radius: 8px;
+            }
+
+            /* Hover effect */
+            #completeQuest:hover {
+                background-color: white;
+                color: #1E1E1E; /* Dark text on hover */
+                box-shadow: 0px 0px 25px white;
+            }
+
+            /* Disabled button */
+            #completeQuest:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                box-shadow: none;
+            }
+
+        </style>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Exercise</th>
+                    <th>Repetitions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if user.rank == 'E' %}
+                    <tr><td>Sit-ups</td><td>10</td></tr>
+                    <tr><td>Push-ups</td><td>10</td></tr>
+                    <tr><td>Squats</td><td>10</td></tr>
+                    <tr><td>Run</td><td>1 KM</td></tr>
+                {% elif user.rank == 'D' %}
+                    <tr><td>Sit-ups</td><td>20</td></tr>
+                    <tr><td>Push-ups</td><td>20</td></tr>
+                    <tr><td>Squats</td><td>20</td></tr>
+                    <tr><td>Run</td><td>1.25 KM</td></tr>
+                {% elif user.rank == 'C' %}
+                    <tr><td>Sit-ups</td><td>30</td></tr>
+                    <tr><td>Push-ups</td><td>30</td></tr>
+                    <tr><td>Squats</td><td>30</td></tr>
+                    <tr><td>Run</td><td>1.5 KM</td></tr>
+                {% elif user.rank == 'B' %}
+                    <tr><td>Sit-ups</td><td>40</td></tr>
+                    <tr><td>Push-ups</td><td>40</td></tr>
+                    <tr><td>Squats</td><td>40</td></tr>
+                    <tr><td>Run</td><td>2 KM</td></tr>
+                {% elif user.rank == 'A' %}
+                    <tr><td>Sit-ups</td><td>50</td></tr>
+                    <tr><td>Push-ups</td><td>50</td></tr>
+                    <tr><td>Squats</td><td>50</td></tr>
+                    <tr><td>Run</td><td>2.5 KM</td></tr>
+                {% elif user.rank == 'S' %}
+                    <tr><td>Sit-ups</td><td>60</td></tr>
+                    <tr><td>Push-ups</td><td>60</td></tr>
+                    <tr><td>Squats</td><td>60</td></tr>
+                    <tr><td>Run</td><td>3 KM</td></tr>
+                {% elif user.rank == 'O' %}
+                    <tr><td>Sit-ups</td><td>60</td></tr>
+                    <tr><td>Push-ups</td><td>60</td></tr>
+                    <tr><td>Squats</td><td>60</td></tr>
+                    <tr><td>Run</td><td>4 KM</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+        
+        
+        <button id="completeQuest" disabled>Complete Quest</button>
+        <p id="statusMessage"></p>
+        
+    </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+    let completeBtn = document.getElementById("completeQuest");
+    let statusMessage = document.getElementById("statusMessage");
+
+    function getNextResetTime() {
+        let now = new Date();
+        let resetTime = new Date();
+        resetTime.setHours(4, 0, 0, 0); // Set reset time to 4 AM
+
+        // If it's already past 4 AM today, set it to 4 AM tomorrow
+        if (now.getTime() > resetTime.getTime()) {
+            resetTime.setDate(resetTime.getDate() + 1);
+        }
+
+        return resetTime.getTime();
+    }
+
+    function checkButtonState() {
+        let lastCompleted = localStorage.getItem("lastCompletedQuest");
+        let nextResetTime = getNextResetTime();
+        let now = new Date().getTime();
+
+        // If the last completion time exists and we're before 4 AM, disable the button
+        if (lastCompleted && now < nextResetTime) {
+            disableButton();
+            showNextQuestMessage();
+            let remainingTime = nextResetTime - now;
+
+            // Enable button at 4 AM
+            setTimeout(enableButton, remainingTime);
+        }
+    }
+
+    function disableButton() {
+        completeBtn.disabled = true;
+        completeBtn.style.opacity = "0.5";
+        completeBtn.style.cursor = "not-allowed";
+    }
+
+    function enableButton() {
+        completeBtn.disabled = false;
+        completeBtn.style.opacity = "1";
+        completeBtn.style.cursor = "pointer";
+        localStorage.removeItem("lastCompletedQuest"); // Clear the stored time
+        statusMessage.innerText = ""; // Remove message when quest is available again
+    }
+
+    function showNextQuestMessage() {
+        statusMessage.innerText = "Next quest will start from 4 AM morning.";
+        statusMessage.style.color = "white";
+    }
+
+    completeBtn.addEventListener("click", function () {
+        fetch("/complete_quest", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                statusMessage.innerText = data.success;
+                localStorage.setItem("lastCompletedQuest", new Date().getTime());
+                disableButton();
+                showNextQuestMessage();
+            } else {
+                statusMessage.innerText = data.error;
+            }
+        });
+    });
+
+    checkButtonState(); // Check the button state when the page loads
+});
+
+    </script>
+    
+    
+    
+    
+
+    <br><br><br>
+
+    
+    <!-- Full-Width Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="/quest"><i class="fa-solid fa-house" style="color: var(--shadow-color);"></i></a>
+        <a href="/ranking"><i class="fa-solid fa-ranking-star"></i></a> <!-- Ranking Icon -->
+        <a href="https://chatnoworg.pythonanywhere.com/{{user.username}}"><i class="fa-solid fa-comments"></i></a>
+        <a href="/guild"><i class="fa-solid fa-shield-halved"></i></a> <!-- Shield Icon -->
+        <a href="/"><i class="fa-solid fa-user"></i></a>
+    </div>
+
+<!-- Sound Effect -->
+<audio id="clickSound">
+    <source src="{{ url_for('static', filename='assets/sounds/click.mp3') }}" type="audio/mpeg">
+</audio>
+
+<!-- jQuery (Ensure it's included) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        let clickSound = document.getElementById("clickSound");
+
+        $("a").on("click", function (event) {
+            // Play click sound
+            clickSound.currentTime = 0;
+            clickSound.play();
+        });
+    });
+</script>
+
+</body>
+
+</html>

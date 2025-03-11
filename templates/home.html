@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome, {{ user.username }}</title>
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        /* General Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: white;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Determine the shadow color based on rank */
+        {% if user.rank in ['E', 'D', 'C'] %}
+            :root { --shadow-color: rgba(0, 162, 255, 0.8); }
+        {% elif user.rank in ['B', 'A'] %}
+            :root { --shadow-color: rgba(128, 0, 128, 0.8); } /* Purple */
+        {% elif user.rank == 'S' %}
+            :root { --shadow-color: rgba(255, 0, 0, 0.8); } /* Red */
+        {% else %}
+            :root { --shadow-color: rgba(0, 162, 255, 0.8); }
+        {% endif %}
+
+        /* Full-Page Content Box */
+        .content-box {
+            flex: 1;
+            flex-wrap: wrap;
+            background-color: #1E1E1E;
+            border: 2px solid white;
+            border-radius: 0px;
+            box-shadow:
+                inset 0 0 20px var(--shadow-color),
+                0 0 20px var(--shadow-color);
+            display: flex;
+            flex-direction: row; /* Aligns elements in a row */
+            justify-content: center; /* Centers content horizontally */
+            align-items: center; /* Centers content vertically */
+            padding-top: 20px; /* Adjust spacing from the top */
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            width: 97%;
+            height: 100%;
+            padding: 20px;
+            gap: 20px; /* Adds spacing between profile image and text */
+        }
+
+                /* Mobile View */
+        @media (max-width: 768px) {
+            .content-box {
+                width: 87%;
+            }
+        }
+
+
+        .profile-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 15px var(--shadow-color);
+            flex-shrink: 0; /* Prevents the image from shrinking */
+        }
+
+        .user-info {
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* Adds spacing between elements */
+        }
+
+
+        /* Full-Width Bottom Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #1E1E1E;
+            border-top: 2px solid rgba(255, 255, 255, 0);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            box-shadow:
+                inset 0 0 15px var(--shadow-color),
+                0 0 15px var(--shadow-color);
+            z-index: 1000; /* Ensure it's above other content */
+
+        }
+        
+
+        /* Navigation Icons */
+        .bottom-nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 28px;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .bottom-nav a:hover {
+            color: #00A2FF;
+            transform: scale(1.2);
+        }
+
+        .user-info {
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* Adds spacing between elements */
+        }
+
+        /* Rank Badge */
+        .rank-badge {
+            padding: 5px 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            text-shadow: 0 0 10px;
+            border: 2px solid white;
+            display: inline-block;
+        }
+
+        .rank-badge.cyan {
+            background-color: rgba(0, 162, 255, 0.2);
+            box-shadow: 0 0 15px cyan;
+        }
+
+        .rank-badge.purple {
+            background-color: rgba(128, 0, 128, 0.2);
+            box-shadow: 0 0 15px rgba(128, 0, 128, 0.8);
+        }
+
+        .rank-badge.red {
+            background-color: rgba(255, 0, 0, 0.2);
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            display: inline-block;
+            width: 100%;
+            height: 8px; /* Reduce height */
+            border-radius: 5px; /* Rounded corners */
+            box-shadow: 0 0 8px var(--shadow-color); /* Glow effect */
+            background-color: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid white;
+        }
+
+        /* Specific Colors */
+        .hp { background-color: rgb(255, 0, 0); } /* HP - Red */
+        .mp { background-color: rgb(0, 0, 255); } /* MP - Blue */
+        .exp { background-color: rgb(0, 255, 0); } /* EXP - Green */
+
+
+        .progress-bar span {
+            display: block;
+            height: 100%;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .progress-container {
+            width: 100%;
+            overflow: visible; /* Allows shadows to be visible outside */
+            padding: 5px 0; /* Adds a little space for the shadow */
+        }
+
+
+        /* Colors for Progress Bars */
+        .hp { width: 100%; background-color: rgb(0, 255, 247); box-shadow: 0 0 10px var(--shadow-color); }
+        .mp { width: 100%; background-color: rgb(0, 255, 247); box-shadow: 0 0 10px var(--shadow-color); }
+        .exp { background-color: rgb(0, 255, 247); box-shadow: 0 0 10px var(--shadow-color); }
+
+        /* EXP Bar with Dynamic Width */
+        .exp-bar {
+            position: relative;
+        }
+
+        .exp-bar .exp {
+            width: 14.8%; /* 120/810 */
+        }
+
+        /* Display Text Inside EXP Bar */
+        .exp-bar::after {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            color: black;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- Full-Page Content Box -->
+    <div class="content-box">
+        <img class="profile-img" alt="Profile Picture" 
+            {% if user.rank in ['E', 'D', 'C'] %}
+                src="{{ url_for('static', filename='assets/profile/blue/img.png') }}" 
+            {% elif user.rank in ['B', 'A'] %}
+                src="{{ url_for('static', filename='assets/profile/purple/img.jpeg') }}" 
+            {% elif user.rank == 'S' %}
+                src="{{ url_for('static', filename='assets/profile/red/img.jpg') }}" 
+            {% else %}
+                src="{{ url_for('static', filename='assets/profile/blue/img.png') }}" 
+            {% endif %}>
+            <a href="/logout" class="btn btn-danger">Logout</a>
+
+        <div class="user-info">
+            <h2>HUNTER ID: [{{ user.id }}]</h2>
+            <h2>HUNTER NAME: [{{ user.username }}]</h2>
+            {% if user.rank in ['E', 'D', 'C'] %}
+            <h3>Rank: <span style="color: white; text-shadow: 0 0 20px cyan; border: 2px solid white; box-shadow: 0 0 20px cyan;">{{ user.rank }}</span></h3>
+            {% elif user.rank in ['B', 'A'] %}
+            <h3>Rank: <span style="color: white; text-shadow: 0 0 20px rgba(128, 0, 128, 0.8); border: 2px solid white; box-shadow: 0 0 20px rgba(128, 0, 128, 0.8);">{{ user.rank }}</span></h3>
+            {% elif user.rank == 'S' %}
+            <h3>Rank: <span style="color: white; text-shadow: 0 0 20px rgba(255, 0, 0, 0.8); border: 2px solid white; box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);">{{ user.rank }}</span></h3>
+            {% else %}
+            <h3>Rank: <span style="color: white; text-shadow: 0 0 20px cyan; border: 2px solid white; box-shadow: 0 0 20px cyan;">{{ user.rank }}</span></h3>
+            {% endif %}
+            <div class="stats">
+                <h3>HP : <span class="progress-bar"><span class="hp"></span></span> {{ user.hp }}%</h3>
+                <h3>MP : <span class="progress-bar"><span class="mp"></span></span> {{ user.mp }}%</h3>
+                <h3>EXP: 
+                    <span class="progress-bar exp-bar">
+                        <span class="exp" style="width: {{ (user.exp_own | int / user.exp_target | int) * 100 }}%;"></span>
+                    </span> 
+                    {{ user.exp_own }} / {{ user.exp_target }}
+                </h3>                
+            </div>        
+        </div>
+    </div>
+
+    <!-- Full-Width Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="/quest"><i class="fa-solid fa-house"></i></a>
+        <a href="/ranking"><i class="fa-solid fa-ranking-star"></i></a> <!-- Ranking Icon -->
+        <a href="https://chatnoworg.pythonanywhere.com/{{user.username}}"><i class="fa-solid fa-comments"></i></a>
+        <a href="/guild"><i class="fa-solid fa-shield-halved"></i></a> <!-- Shield Icon -->
+        <a href="/"><i class="fa-solid fa-user" style="color: var(--shadow-color);"></i></a>
+    </div>
+
+
+<!-- Sound Effect -->
+<audio id="clickSound">
+    <source src="{{ url_for('static', filename='assets/sounds/click.mp3') }}" type="audio/mpeg">
+</audio>
+
+<!-- jQuery (Ensure it's included) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        let clickSound = document.getElementById("clickSound");
+
+        $("a").on("click", function (event) {
+            // Play click sound
+            clickSound.currentTime = 0;
+            clickSound.play();
+        });
+    });
+</script>
+
+
+</body>
+
+</html>
